@@ -3,7 +3,7 @@
 # LICENSE: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 #
 # Instructions:
-# Download build script: wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.12.0/build_tensorflow.sh
+# Download build script: wget https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.15.0/build_tensorflow.sh
 # Execute build script: bash build_tensorflow.sh    (provide -h for help)
 #
 
@@ -17,7 +17,7 @@ USER="$(whoami)"
 
 
 #PATCH_URL
-PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.15.0/patch"
+PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.12.0/patch"
 
 
 FORCE="false"
