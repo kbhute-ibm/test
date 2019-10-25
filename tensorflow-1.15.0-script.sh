@@ -157,7 +157,7 @@ function runTest() {
 	set +e
 	if [[ "$TESTS" == "true" ]]; then
 		printf -- "TEST Flag is set , Continue with running test \n" 
-		bazel --host_jvm_args="-Xms512m" --host_jvm_args="-Xmx1024m" test --test_timeout 300,450,1200,3600 --build_tests_only -- //tensorflow/... -//tensorflow/compiler/... -//tensorflow/core/platform/cloud/... -//tensorflow/contrib/lite/... -//tensorflow/contrib/cloud/... -//tensorflow/java/...  
+		bazel --host_jvm_args="-Xms1024m" --host_jvm_args="-Xmx2048m" test --define=tensorflow_mkldnn_contraction_kernel=0 --host_javabase="@local_jdk//:jdk" --test_tag_filters=-gpu,-benchmark-test -k   --test_timeout 300,450,1200,3600 --build_tests_only --test_output=errors -- //tensorflow/... -//tensorflow/compiler/... -//tensorflow/lite/... -//tensorflow/core/platform/cloud/... -//tensorflow/java/...
 
 		printf -- "Tests completed. \n"
 
