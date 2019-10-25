@@ -10,14 +10,14 @@
 set -e  -o pipefail
 
 PACKAGE_NAME="tensorflow"
-PACKAGE_VERSION="1.12.0"
+PACKAGE_VERSION="1.15.0"
 CURDIR="$(pwd)"
 SOURCE_ROOT="$(pwd)"
 USER="$(whoami)"
 
 
 #PATCH_URL
-PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.12.0/patch"
+PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.15.0/patch"
 
 
 FORCE="false"
@@ -71,7 +71,7 @@ function prepare() {
 
 function cleanup() {
     # Remove artifacts
-	rm -rf $SOURCE_ROOT/bazel/bazel-0.15.0-dist.zip
+	rm -rf $SOURCE_ROOT/bazel/bazel-0.26.1-dist.zip
 	
     printf -- "Cleaned up the artifacts\n" | tee -a "$LOG_FILE"
 
@@ -88,8 +88,8 @@ function configureAndInstall() {
 	printf -- '\nBuilding bazel..... \n' 
 	cd $SOURCE_ROOT
 	mkdir bazel && cd bazel  
-	wget https://github.com/bazelbuild/bazel/releases/download/0.15.0/bazel-0.15.0-dist.zip 
-	unzip bazel-0.15.0-dist.zip  
+	wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-dist.zip 
+	unzip bazel-0.26.1-dist.zip  
 	chmod -R +w .
 	
 	#Adding fixes and patches to the files
@@ -105,35 +105,33 @@ function configureAndInstall() {
 	printf -- '\nBuilding Tensorflow..... \n' 
 	cd $SOURCE_ROOT
 	rm -rf tensorflow
-	git clone https://github.com/linux-on-ibm-z/tensorflow.git 
+	git clone https://github.com/tensorflow/tensorflow.git 
 	cd tensorflow 
-	git checkout v1.12.0-s390x 
+	git checkout v1.15.0
 	
-	export TF_NEED_IGNITE=0
 	export TF_NEED_GCP=0 
+	export TF_NEED_HDFS=0 
 	export TF_NEED_CUDA=0 
-	export TF_ENABLE_XLA=0 
-	export TF_NEED_GDR=0 
+	export TF_NEED_MKL=0 
+	export TF_NEED_OPENCL=0 
 	export TF_NEED_VERBS=0 
-	export TF_NEED_MPI=0 
-	export TF_NEED_OPENCL_SYCL=0 
-	export TF_SET_ANDROID_WORKSPACE=0 
-	export TF_NEED_GCP=0 
-	export TF_CUDA_CLANG=0 
-	export TF_NEED_ROCM=0 
-	export PYTHON_BIN_PATH=`which python2`
+	export TF_NEED_S3=0 
+	export TF_NEED_KAFKA=0 
+	export TF_NEED_AWS=0 
+	export TF_ENABLE_XLA=0
+	export PYTHON_BIN_PATH=`which python`
 				      
 	yes "" | ./configure || true
 	
 	printf -- '\nBuilding TENSORFLOW..... \n' 
-	bazel --host_jvm_args="-Xms512m" --host_jvm_args="-Xmx1024m" build -c opt //tensorflow/tools/pip_package:build_pip_package 
+	bazel --host_jvm_args="-Xms5120m" --host_jvm_args="-Xmx5120m" build  --define=tensorflow_mkldnn_contraction_kernel=0 //tensorflow/tools/pip_package:build_pip_package
 	
 	
 	#Build and install TensorFlow wheel
 	printf -- '\nBuilding and installing Tensorflow wheel..... \n' 
 	cd $SOURCE_ROOT/tensorflow
 	bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_wheel 
-	sudo pip install /tmp/tensorflow_wheel/tensorflow-1.12.0-cp27-cp27mu-linux_s390x.whl 
+	sudo pip3 install /tmp/tensorflow_wheel/tensorflow-1.12.0-cp27-cp27mu-linux_s390x.whl 
 	
 
 	# Run Tests
@@ -237,12 +235,19 @@ case "$DISTRO" in
 	printf -- "Installing %s %s for %s \n" "$PACKAGE_NAME" "$PACKAGE_VERSION" "$DISTRO" |& tee -a "$LOG_FILE"
 	printf -- "Installing dependencies... it may take some time.\n"
 	sudo apt-get update -y
-	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven openjdk-8-jdk python-pip python-virtualenv swig python-dev libcurl3-dev python-mock python-scipy bzip2 glibc* python-sklearn python-numpy patch libhdf5-dev libssl-dev golang |& tee -a "${LOG_FILE}"
-	sudo pip install wheel backports.weakref portpicker futures grpc enum34 |& tee -a "${LOG_FILE}"
-	sudo pip install keras_applications==1.0.5 --no-deps |& tee -a "${LOG_FILE}"
-	sudo pip install keras_preprocessing==1.0.3 --no-deps |& tee -a "${LOG_FILE}"
-	sudo pip install numpy==1.13.3 keras |& tee -a "${LOG_FILE}"
+	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven python3-pip python3-virtualenv python3-numpy swig python3-dev libcurl3-dev python3-mock python3-scipy bzip2 libhdf5-dev patch git patch libssl-dev |& tee -a "${LOG_FILE}"
+	sudo apt-get install --no-install-recommends python3-sklearn |& tee -a "${LOG_FILE}"
+	sudo pip3 install install numpy==1.16.2 future wheel backports.weakref portpicker futures==2.2.0 enum34 keras_preprocessing keras_applications h5py tensorflow_estimator |& tee -a "${LOG_FILE}"
+	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
+	sudo -E pip3 install grpcio==1.24.3 |& tee -a "${LOG_FILE}"
 	
+	cd $SOURCE_ROOT
+	wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.5%2B10/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.5_10.tar.gz
+	tar -xvf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.5_10.tar.gz
+	export JAVA_HOME=$SOURCE_ROOT/jdk-11.0.5+10
+	export PATH=$JAVA_HOME/bin:$PATH
+	
+	sudo ln -s /usr/bin/python3 /usr/bin/python
 	configureAndInstall |& tee -a "${LOG_FILE}"
 	;;
 
