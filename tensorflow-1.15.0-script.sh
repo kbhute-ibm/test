@@ -100,9 +100,9 @@ function configureAndInstall() {
 	printf -- '\nBuilding Tensorflow..... \n' 
 	cd $SOURCE_ROOT
 	rm -rf tensorflow
-	git clone https://github.com/tensorflow/tensorflow.git 
+	git clone https://github.com/linux-on-ibm-z/tensorflow.git
 	cd tensorflow 
-	git checkout v1.15.0
+	git checkout v1.15.0-s390x
 	
 	export TF_NEED_GCP=0 
 	export TF_NEED_HDFS=0 
