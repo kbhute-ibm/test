@@ -131,7 +131,7 @@ function configureAndInstall() {
 	printf -- '\nBuilding and installing Tensorflow wheel..... \n' 
 	cd $SOURCE_ROOT/tensorflow
 	bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_wheel 
-	sudo pip3 install /tmp/tensorflow_wheel/tensorflow-1.12.0-cp27-cp27mu-linux_s390x.whl 
+	sudo pip3 install /tmp/tensorflow_wheel/tensorflow-1.15.0-cp*-linux_s390x.whl 
 	
 
 	# Run Tests
@@ -236,7 +236,7 @@ case "$DISTRO" in
 	printf -- "Installing dependencies... it may take some time.\n"
 	sudo apt-get update -y
 	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven python3-pip python3-virtualenv python3-numpy swig python3-dev libcurl3-dev python3-mock python3-scipy bzip2 libhdf5-dev patch git patch libssl-dev |& tee -a "${LOG_FILE}"
-	sudo apt-get install --no-install-recommends python3-sklearn |& tee -a "${LOG_FILE}"
+	sudo apt-get install --no-install-recommends -y python3-sklearn |& tee -a "${LOG_FILE}"
 	sudo pip3 install install numpy==1.16.2 future wheel backports.weakref portpicker futures==2.2.0 enum34 keras_preprocessing keras_applications h5py tensorflow_estimator |& tee -a "${LOG_FILE}"
 	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
 	sudo -E pip3 install grpcio==1.24.3 |& tee -a "${LOG_FILE}"
@@ -255,11 +255,10 @@ case "$DISTRO" in
 	printf -- "Installing %s %s for %s \n" "$PACKAGE_NAME" "$PACKAGE_VERSION" "$DISTRO" |& tee -a "$LOG_FILE"
 	printf -- "Installing dependencies... it may take some time.\n"
 	sudo apt-get update -y
-	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven openjdk-8-jdk python-pip python-virtualenv python-numpy swig python-dev libcurl3-dev python-mock python-scipy bzip2 glibc* python-sklearn patch libhdf5-dev libssl-dev golang |& tee -a "${LOG_FILE}"
-	sudo pip install wheel backports.weakref portpicker futures grpc enum34 |& tee -a "${LOG_FILE}"
-	sudo pip install keras_applications==1.0.5 --no-deps |& tee -a "${LOG_FILE}"
-	sudo pip install keras_preprocessing==1.0.3 --no-deps |& tee -a "${LOG_FILE}"
-
+	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven openjdk-11-jdk python3-pip python3-virtualenv python3-numpy swig python3-dev libcurl3-dev python3-mock python3-scipy bzip2 libhdf5-dev patch git patch libssl-dev |& tee -a "${LOG_FILE}"
+	sudo apt-get install --no-install-recommends python3-sklearn
+	sudo pip3 install numpy==1.16.2 future wheel backports.weakref portpicker futures enum34 keras_preprocessing keras_applications h5py tensorflow_estimator==1.15.1 |& tee -a "${LOG_FILE}"
+	
     configureAndInstall |& tee -a "${LOG_FILE}"
 	;;
 
