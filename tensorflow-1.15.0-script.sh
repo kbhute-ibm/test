@@ -79,16 +79,6 @@ function cleanup() {
 function configureAndInstall() {
 	printf -- 'Configuration and Installation started \n'
 
-	#Install grpcio
-	printf -- "\nInstalling grpcio. . . \n" 
-	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
-    	
-	if [[ "$DISTRO" == "ubuntu-16.04" ]]; then
-          sudo -E pip install grpcio==1.24.3
-    	else
-	  sudo -E pip install grpcio
-	fi
-
 	# Build Bazel
 	printf -- '\nBuilding bazel..... \n' 
 	cd $SOURCE_ROOT
@@ -241,9 +231,14 @@ case "$DISTRO" in
 	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven python3-pip python3-virtualenv python3-numpy swig python3-dev libcurl3-dev python3-mock python3-scipy bzip2 libhdf5-dev patch git patch libssl-dev |& tee -a "${LOG_FILE}"
 	sudo apt-get install --no-install-recommends -y python3-sklearn |& tee -a "${LOG_FILE}"
 	sudo pip3 install install numpy==1.16.2 future wheel backports.weakref portpicker futures==2.2.0 enum34 keras_preprocessing keras_applications h5py tensorflow_estimator |& tee -a "${LOG_FILE}"
+
+	#Install grpcio
+	printf -- "\nInstalling grpcio. . . \n" 
+	
 	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
 	sudo -E pip3 install grpcio==1.24.3 |& tee -a "${LOG_FILE}"
 	
+	#Install OpenJDK11
 	cd $SOURCE_ROOT
 	wget https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.5%2B10/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.5_10.tar.gz
 	tar -xvf OpenJDK11U-jdk_s390x_linux_hotspot_11.0.5_10.tar.gz
@@ -251,6 +246,7 @@ case "$DISTRO" in
 	export PATH=$JAVA_HOME/bin:$PATH
 	
 	sudo ln -s /usr/bin/python3 /usr/bin/python
+	
 	configureAndInstall |& tee -a "${LOG_FILE}"
 	;;
 
@@ -262,7 +258,15 @@ case "$DISTRO" in
 	sudo apt-get install --no-install-recommends python3-sklearn
 	sudo pip3 install numpy==1.16.2 future wheel backports.weakref portpicker futures enum34 keras_preprocessing keras_applications h5py tensorflow_estimator==1.15.1 |& tee -a "${LOG_FILE}"
 	
-    configureAndInstall |& tee -a "${LOG_FILE}"
+	
+	#Install grpcio
+	printf -- "\nInstalling grpcio. . . \n" 
+	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
+	sudo -E pip3 install grpcio |& tee -a "${LOG_FILE}"
+	
+	sudo ln -s /usr/bin/python3 /usr/bin/python
+	
+	configureAndInstall |& tee -a "${LOG_FILE}"
 	;;
 
 *)
