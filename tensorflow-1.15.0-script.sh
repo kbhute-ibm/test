@@ -82,7 +82,12 @@ function configureAndInstall() {
 	#Install grpcio
 	printf -- "\nInstalling grpcio. . . \n" 
 	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True
-    	sudo -E pip install grpcio 
+    	
+	if [[ "$DISTRO" == "ubuntu-16.04" ]]; then
+          sudo -E pip install grpcio==1.24.3
+    	else
+	  sudo -E pip install grpcio
+	fi
 
 	# Build Bazel
 	printf -- '\nBuilding bazel..... \n' 
@@ -211,14 +216,12 @@ function gettingStarted() {
 	printf -- "  $ cd $SOURCE_ROOT  \n"
 	printf -- "  $ python  \n"
 	printf -- "   >>> import tensorflow as tf  \n"
+	printf -- "   >>> tf.enable_eager_execution()  \n"
+	printf -- "   >>> tf.add(1, 2).numpy()  \n"
+	printf -- "   3  \n"
 	printf -- "   >>> hello = tf.constant('Hello, TensorFlow!')  \n"
-	printf -- "   >>> sess = tf.Session()  \n"
-	printf -- "   >>> print(sess.run(hello))  \n"
-	printf -- "   	  Hello, TensorFlow!  \n"
-	printf -- "   >>> a = tf.constant(10)  \n"
-	printf -- "   >>> b = tf.constant(32)  \n"
-	printf -- "   >>> print(sess.run(a + b))  \n"
-	printf -- "   	  42  \n"	
+	printf -- "   >>> hello.numpy()  \n"
+	printf -- "   Hello, TensorFlow!'  \n"	
 	printf -- "   >>> \n\n"
 	printf -- '*************************************************************************************************\n'
 	printf -- '\n'
@@ -251,7 +254,7 @@ case "$DISTRO" in
 	configureAndInstall |& tee -a "${LOG_FILE}"
 	;;
 
-"ubuntu-18.04" )
+"ubuntu-18.04" | "ubuntu-19.04" )
 	printf -- "Installing %s %s for %s \n" "$PACKAGE_NAME" "$PACKAGE_VERSION" "$DISTRO" |& tee -a "$LOG_FILE"
 	printf -- "Installing dependencies... it may take some time.\n"
 	sudo apt-get update -y
