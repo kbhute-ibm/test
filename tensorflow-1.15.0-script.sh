@@ -191,7 +191,7 @@ function gettingStarted() {
 	printf -- "Getting Started: \n"
 	printf -- "To verify, run TensorFlow from command Line : \n"
 	printf -- "  $ cd $SOURCE_ROOT  \n"
-	printf -- "  $ python  \n"
+	printf -- "  $ /usr/bin/python3  \n"
 	printf -- "   >>> import tensorflow as tf  \n"
 	printf -- "   >>> tf.enable_eager_execution()  \n"
 	printf -- "   >>> tf.add(1, 2).numpy()  \n"
