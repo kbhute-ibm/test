@@ -198,6 +198,7 @@ function gettingStarted() {
 	printf -- "   >>> hello.numpy()  \n"
 	printf -- "   Hello, TensorFlow!'  \n"	
 	printf -- "   >>> \n\n"
+	printf -- 'Make sure JAVA_HOME is set and bazel binary is in your path in case of test case execution.'
 	printf -- '*************************************************************************************************\n'
 	printf -- '\n'
 }
