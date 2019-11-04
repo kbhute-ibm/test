@@ -115,15 +115,13 @@ function configureAndInstall() {
 	yes "" | ./configure || true
 	
 	printf -- '\nBuilding TENSORFLOW..... \n' 
-	bazel --host_jvm_args="-Xms5120m" --host_jvm_args="-Xmx5120m" build  --define=tensorflow_mkldnn_contraction_kernel=0 //tensorflow/tools/pip_package:build_pip_package
-	
+	bazel --host_jvm_args="-Xms512m" --host_jvm_args="-Xmx1024m" build  --define=tensorflow_mkldnn_contraction_kernel=0 //tensorflow/tools/pip_package:build_pip_package
 	
 	#Build and install TensorFlow wheel
 	printf -- '\nBuilding and installing Tensorflow wheel..... \n' 
 	cd $SOURCE_ROOT/tensorflow
 	bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_wheel 
 	sudo pip3 install /tmp/tensorflow_wheel/tensorflow-1.15.0-cp*-linux_s390x.whl 
-	
 
 	# Run Tests
 	runTest
