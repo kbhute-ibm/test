@@ -16,10 +16,6 @@ SOURCE_ROOT="$(pwd)"
 USER="$(whoami)"
 
 
-#PATCH_URL
-PATCH_URL="https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master/Tensorflow/1.12.0/patch"
-
-
 FORCE="false"
 TESTS="false"
 LOG_FILE="${CURDIR}/logs/${PACKAGE_NAME}-${PACKAGE_VERSION}-$(date +"%F-%T").log"
@@ -88,11 +84,11 @@ function configureAndInstall() {
 	chmod -R +w .
 	
 	#Adding fixes and patches to the files
-	fileChanges
+	sed -i "130s/-classpath/-J-Xms1g -J-Xmx1g -classpath/" scripts/bootstrap/compile.sh
 	
 	
 	cd $SOURCE_ROOT/bazel
-	env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh 
+	env EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk" bash ./compile.sh
 	export PATH=$PATH:$SOURCE_ROOT/bazel/output/ 
 	echo $PATH
 	
@@ -138,15 +134,6 @@ function configureAndInstall() {
 	printf -- "\n Installation of %s %s was sucessfull \n\n" $PACKAGE_NAME $PACKAGE_VERSION
 }
 
-function fileChanges(){
-
-	printf -- "\nDownloading patch for compile.sh . . . \n" 
-	curl  -o "patch_compile.diff" $PATCH_URL/patch_compile.diff 
-	printf -- "\nApplying patch to compile.sh . . . \n"  
-	patch $SOURCE_ROOT/bazel/scripts/bootstrap/compile.sh patch_compile.diff 
-	rm -rf patch_compile.diff
-
-}
 
 function runTest() {
 	set +e
@@ -229,7 +216,7 @@ case "$DISTRO" in
 	printf -- "Installing dependencies... it may take some time.\n"
 	sudo apt-get update -y
 	sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip git vim tar wget automake autoconf libtool make curl maven python3-pip python3-virtualenv python3-numpy swig python3-dev libcurl3-dev python3-mock python3-scipy bzip2 libhdf5-dev patch git patch libssl-dev |& tee -a "${LOG_FILE}"
-	sudo apt-get install --no-install-recommends python3-sklearn   |& tee -a "${LOG_FILE}"
+	sudo apt-get install --no-install-recommends -y python3-sklearn   |& tee -a "${LOG_FILE}"
 	sudo pip3 install numpy==1.16.2 future wheel backports.weakref portpicker futures==2.2.0 enum34 keras_preprocessing keras_applications h5py tensorflow_estimator==1.15.1 |& tee -a "${LOG_FILE}"
 
 	#Install grpcio
